@@ -77,7 +77,7 @@ export class PromotionReviewInboxService {
 
 	isEnabled() {
 		return (
-			this.licenseState.isLicensed(LICENSE_FEATURES.GIT_CONNECTIONS) &&
+			this.licenseState.isLicensed(LICENSE_FEATURES.PROMOTIONS) &&
 			isEnvFeatureEnabled('N8N_ENV_FEAT_PROMOTIONS')
 		);
 	}
@@ -297,7 +297,7 @@ export class PromotionReviewInboxService {
 	}
 }
 
-const canRead = (user: User) => hasGlobalScope(user, 'gitConnection:readReviews');
+const canRead = (user: User) => hasGlobalScope(user, 'promotions:readReviews');
 
 const failed = (remoteError: PromotionReviewRemoteError): RemoteView => ({
 	mergeRequest: null,
