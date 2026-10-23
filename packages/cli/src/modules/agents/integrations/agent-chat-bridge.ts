@@ -279,6 +279,7 @@ export class AgentChatBridge {
 			agentService,
 			logger,
 			callbackStore: this.callbackStore,
+			claimAction: this.integrationImpl?.claimAction?.bind(this.integrationImpl),
 			deleteActionMessageBeforeResume:
 				this.integrationImpl?.deleteActionMessageBeforeResume ?? true,
 			formatActionDecisionMessage: (params) =>
