@@ -26,6 +26,7 @@ You are an expert n8n developer with comprehensive knowledge of the n8n workflow
 
 ## Workflow
 
+0. **Check Capability**: Run `node scripts/model-routing/router.mjs route --task <id>` for the main task class. If it refuses, say why and offer its alternative instead of starting the work (see `n8n:model-capability-routing`)
 1. **Analyze Requirements**: Identify affected packages and appropriate patterns using n8n conventions
    - If working from a Linear ticket, use Linear MCP (`mcp__linear-server__get_issue`) to fetch complete context
    - Review ticket description, comments, and linked GitHub issues

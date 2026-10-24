@@ -1,0 +1,869 @@
+{
+	"$comment": "Routing judgements, not benchmark claims. Re-check profiles when a new family ships. Every task class must stay reachable, or `check` fails.",
+	"schemaVersion": 1,
+	"reviewedAt": "2026-10-24",
+
+	"tiers": {
+		"$comment": "Capability bands. minTier is the weakest band that reliably finishes a task unattended.",
+		"frontier": 3,
+		"balanced": 2,
+		"efficient": 1,
+		"unknown": 0
+	},
+
+	"capabilities": {
+		"$comment": "Model-side flags. Tasks require them, profiles declare them; `check` keeps both aligned.",
+		"multiFileEdit": "Can hold a change plan across several files and apply it consistently.",
+		"longHorizonPlanning": "Can own a multi-step task for many tool calls without losing the goal.",
+		"deepReasoning": "Reliable on ambiguous architecture, root-cause and trade-off analysis.",
+		"toolUse": "Calls tools with well-formed arguments and recovers from tool errors.",
+		"codeExecution": "Writes and runs code/commands and interprets the result.",
+		"longContext": "Comfortable reading large diffs, logs and many files in one pass.",
+		"vision": "Can read screenshots, diagrams and rendered UI.",
+		"structuredOutput": "Produces strict JSON/YAML matching a requested schema.",
+		"imageGeneration": "Can synthesize or edit images."
+	},
+
+	"harnessCapabilities": {
+		"$comment": "Tool-side flags. false is a hard block; \"unknown\" means verify before promising.",
+		"webSearch": "Can search the public web.",
+		"imageGeneration": "Has an image generation or editing tool.",
+		"audioInput": "Can accept audio input.",
+		"shell": "Can run shell commands in the workspace.",
+		"previewServer": "Can expose a long-running server as a live preview.",
+		"githubWrite": "Can create or merge PRs, issues and releases.",
+		"gitPush": "Can push branches to the remote.",
+		"browserAutomation": "Can drive a real browser."
+	},
+
+	"detection": {
+		"$comment": "Checked in order; first non-empty wins. High confidence only if it names the model.",
+		"modelFlag": "--model",
+		"modelEnvVars": [
+			{ "name": "ARENA_MODEL", "confidence": "high", "source": "arena" },
+			{ "name": "ARENA_AGENT_MODEL", "confidence": "high", "source": "arena" },
+			{ "name": "AGENT_MODEL", "confidence": "medium", "source": "generic" },
+			{ "name": "ANTHROPIC_MODEL", "confidence": "medium", "source": "anthropic" },
+			{ "name": "CLAUDE_MODEL", "confidence": "medium", "source": "anthropic" },
+			{ "name": "OPENAI_MODEL", "confidence": "medium", "source": "openai" },
+			{ "name": "GEMINI_MODEL", "confidence": "medium", "source": "google" },
+			{ "name": "GOOGLE_MODEL", "confidence": "medium", "source": "google" },
+			{ "name": "XAI_MODEL", "confidence": "medium", "source": "xai" },
+			{ "name": "MOONSHOT_MODEL", "confidence": "medium", "source": "moonshot" },
+			{ "name": "QWEN_MODEL", "confidence": "medium", "source": "alibaba" },
+			{ "name": "DEEPSEEK_MODEL", "confidence": "medium", "source": "deepseek" },
+			{ "name": "MISTRAL_MODEL", "confidence": "medium", "source": "mistral" },
+			{ "name": "OLLAMA_MODEL", "confidence": "medium", "source": "local" },
+			{ "name": "LLM_MODEL", "confidence": "low", "source": "generic" },
+			{ "name": "MODEL_NAME", "confidence": "low", "source": "generic" }
+		],
+		"harnessEnvVars": [
+			{ "name": "ARENA_SESSION_ID", "harness": "arena" },
+			{ "name": "ARENA_SANDBOX_ID", "harness": "arena" },
+			{ "name": "E2B_SANDBOX_ID", "harness": "arena" },
+			{ "name": "CLAUDECODE", "harness": "claude-code" },
+			{ "name": "OPENCODE", "harness": "opencode" },
+			{ "name": "GITHUB_ACTIONS", "harness": "github-actions" },
+			{ "name": "CURSOR_TRACE_ID", "harness": "cursor" }
+		],
+		"defaultHarness": "generic"
+	},
+
+	"harnesses": {
+		"arena": {
+			"webSearch": true,
+			"imageGeneration": true,
+			"audioInput": "unknown",
+			"shell": true,
+			"previewServer": true,
+			"githubWrite": true,
+			"gitPush": true,
+			"browserAutomation": "unknown"
+		},
+		"claude-code": {
+			"webSearch": true,
+			"imageGeneration": false,
+			"audioInput": false,
+			"shell": true,
+			"previewServer": true,
+			"githubWrite": true,
+			"gitPush": true,
+			"browserAutomation": "unknown"
+		},
+		"opencode": {
+			"webSearch": true,
+			"imageGeneration": false,
+			"audioInput": false,
+			"shell": true,
+			"previewServer": true,
+			"githubWrite": true,
+			"gitPush": true,
+			"browserAutomation": "unknown"
+		},
+		"cursor": {
+			"webSearch": true,
+			"imageGeneration": false,
+			"audioInput": false,
+			"shell": true,
+			"previewServer": true,
+			"githubWrite": "unknown",
+			"gitPush": "unknown",
+			"browserAutomation": "unknown"
+		},
+		"github-actions": {
+			"webSearch": false,
+			"imageGeneration": false,
+			"audioInput": false,
+			"shell": true,
+			"previewServer": false,
+			"githubWrite": true,
+			"gitPush": true,
+			"browserAutomation": false
+		},
+		"generic": {
+			"webSearch": "unknown",
+			"imageGeneration": "unknown",
+			"audioInput": "unknown",
+			"shell": true,
+			"previewServer": "unknown",
+			"githubWrite": "unknown",
+			"gitPush": "unknown",
+			"browserAutomation": "unknown"
+		}
+	},
+
+	"profiles": {
+		"$comment": "Longest literal run wins, so `*gpt-5-mini*` beats `*gpt-5*`. Match families, not versions.",
+		"anthropic-claude-opus": {
+			"label": "Claude Opus-class",
+			"family": "anthropic",
+			"tier": "frontier",
+			"match": ["*opus*", "claude-opus-*", "claude-4*-opus*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": true,
+				"deepReasoning": true,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": true,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"anthropic-claude-sonnet": {
+			"label": "Claude Sonnet-class",
+			"family": "anthropic",
+			"tier": "balanced",
+			"match": ["*sonnet*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": true,
+				"deepReasoning": true,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": true,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"anthropic-claude-haiku": {
+			"label": "Claude Haiku-class",
+			"family": "anthropic",
+			"tier": "efficient",
+			"match": ["*haiku*"],
+			"capabilities": {
+				"multiFileEdit": false,
+				"longHorizonPlanning": false,
+				"deepReasoning": false,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": false,
+				"vision": true,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"openai-frontier": {
+			"label": "OpenAI frontier (GPT-5 / o-series)",
+			"family": "openai",
+			"tier": "frontier",
+			"match": ["*gpt-5*", "*gpt-6*", "o3*", "o4*", "*o3-*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": true,
+				"deepReasoning": true,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": true,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"openai-mini": {
+			"label": "OpenAI mini/nano",
+			"family": "openai",
+			"tier": "efficient",
+			"match": [
+				"*gpt-5-mini*",
+				"*gpt-5-nano*",
+				"*gpt-4.1-mini*",
+				"*gpt-4.1-nano*",
+				"*gpt-4o-mini*",
+				"*o3-mini*",
+				"*o4-mini*"
+			],
+			"capabilities": {
+				"multiFileEdit": false,
+				"longHorizonPlanning": false,
+				"deepReasoning": false,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": true,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"openai-balanced": {
+			"label": "OpenAI general purpose",
+			"family": "openai",
+			"tier": "balanced",
+			"match": ["gpt-4.1*", "gpt-4o*", "*gpt-4-turbo*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": true,
+				"deepReasoning": true,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": true,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"google-gemini-pro": {
+			"label": "Gemini Pro-class",
+			"family": "google",
+			"tier": "frontier",
+			"match": ["*gemini-*-pro*", "*gemini-pro*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": true,
+				"deepReasoning": true,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": true,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"google-gemini-flash": {
+			"label": "Gemini Flash-class",
+			"family": "google",
+			"tier": "balanced",
+			"match": ["*gemini-*-flash*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": false,
+				"deepReasoning": false,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": true,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"google-gemini-flash-lite": {
+			"label": "Gemini Flash-Lite",
+			"family": "google",
+			"tier": "efficient",
+			"match": ["*flash-lite*", "*gemini-*-lite*"],
+			"capabilities": {
+				"multiFileEdit": false,
+				"longHorizonPlanning": false,
+				"deepReasoning": false,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": true,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"xai-grok": {
+			"label": "Grok-class",
+			"family": "xai",
+			"tier": "frontier",
+			"match": ["*grok*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": true,
+				"deepReasoning": true,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": true,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"moonshot-kimi": {
+			"label": "Kimi-class",
+			"family": "moonshot",
+			"tier": "frontier",
+			"match": ["*kimi*", "*k2*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": true,
+				"deepReasoning": true,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": false,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"alibaba-qwen-frontier": {
+			"label": "Qwen Max-class",
+			"family": "alibaba",
+			"tier": "frontier",
+			"match": ["*qwen-max*", "*qwen3-max*", "*qwen-max-latest*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": true,
+				"deepReasoning": true,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": false,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"alibaba-qwen-balanced": {
+			"label": "Qwen Plus/Coder-class",
+			"family": "alibaba",
+			"tier": "balanced",
+			"match": ["*qwen*plus*", "*qwen*coder*", "*qwen3*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": false,
+				"deepReasoning": false,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": false,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"deepseek-reasoner": {
+			"label": "DeepSeek Reasoner-class",
+			"family": "deepseek",
+			"tier": "frontier",
+			"match": ["*deepseek-r*", "*deepseek-reasoner*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": false,
+				"deepReasoning": true,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": false,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"deepseek-standard": {
+			"label": "DeepSeek standard",
+			"family": "deepseek",
+			"tier": "balanced",
+			"match": ["*deepseek*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": false,
+				"deepReasoning": false,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": false,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"meta-llama": {
+			"label": "Llama-class",
+			"family": "meta",
+			"tier": "balanced",
+			"match": ["*llama-4*", "*llama4*", "*llama-3.3*", "*llama3.3*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": false,
+				"deepReasoning": false,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": false,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"mistral-large": {
+			"label": "Mistral Large/Devstral-class",
+			"family": "mistral",
+			"tier": "balanced",
+			"match": ["*mistral-large*", "*devstral*", "*codestral*"],
+			"capabilities": {
+				"multiFileEdit": true,
+				"longHorizonPlanning": false,
+				"deepReasoning": false,
+				"toolUse": true,
+				"codeExecution": true,
+				"longContext": true,
+				"vision": false,
+				"structuredOutput": true,
+				"imageGeneration": false
+			}
+		},
+		"local-small": {
+			"label": "Small/local model",
+			"family": "local",
+			"tier": "efficient",
+			"match": ["*local*", "*7b*", "*8b*", "*3b*", "*1.5b*", "*phi-*", "*gemma*"],
+			"capabilities": {
+				"multiFileEdit": false,
+				"longHorizonPlanning": false,
+				"deepReasoning": false,
+				"toolUse": false,
+				"codeExecution": true,
+				"longContext": false,
+				"vision": false,
+				"structuredOutput": false,
+				"imageGeneration": false
+			}
+		}
+	},
+
+	"fallbackProfile": {
+		"$comment": "Used when nothing matches or nothing was reported. Assume the least and ask.",
+		"label": "Unidentified model",
+		"family": "unknown",
+		"tier": "unknown",
+		"capabilities": {
+			"multiFileEdit": false,
+			"longHorizonPlanning": false,
+			"deepReasoning": false,
+			"toolUse": false,
+			"codeExecution": false,
+			"longContext": false,
+			"vision": false,
+			"structuredOutput": false,
+			"imageGeneration": false
+		}
+	},
+
+	"taskClasses": {
+		"$comment": "requires = model flags, requiresHarness = tool flags, guardrails = conditions even when allowed. Omit minTier if any model can do it.",
+		"multi-file-refactor": {
+			"label": "Multi-file refactor",
+			"minTier": "balanced",
+			"requires": ["multiFileEdit", "longHorizonPlanning", "toolUse"],
+			"suitableExamples": [
+				"split a service into a controller, service and repository",
+				"rename a config key across packages and update every call site",
+				"move a shared type into @n8n/api-types"
+			],
+			"unsuitableExamples": [
+				"rewrite the whole editor-ui state layer",
+				"refactor packages/core while the model cannot run tests"
+			],
+			"guardrails": [
+				"Land the change in reviewable slices; never leave the tree unbuildable between slices.",
+				"Run typecheck and the affected package's tests before claiming done."
+			],
+			"alternatives": [
+				"Do one package or one symbol per turn and confirm each slice.",
+				"Hand off to a frontier model with this scope statement."
+			]
+		},
+		"architecture-design": {
+			"label": "Architecture and design decisions",
+			"minTier": "frontier",
+			"requires": ["deepReasoning", "longHorizonPlanning"],
+			"suitableExamples": [
+				"decide where a new execution hook belongs",
+				"compare two migration strategies for a table",
+				"design the boundary between the editor and the AI assistant"
+			],
+			"unsuitableExamples": [
+				"invent a new database engine",
+				"guess at infrastructure the repo does not document"
+			],
+			"guardrails": [
+				"State assumptions and cite the files that support them.",
+				"Prefer the existing pattern in @n8n/api-types, @n8n/di and @n8n/config."
+			],
+			"alternatives": [
+				"Ask for a written spec first (n8n:spec-driven-development), then implement the agreed part."
+			]
+		},
+		"bug-root-cause": {
+			"label": "Bug root-cause analysis",
+			"minTier": "balanced",
+			"requires": ["deepReasoning", "toolUse", "codeExecution"],
+			"suitableExamples": [
+				"find why a node returns a 429 wrapped as a success",
+				"trace a stack frame into the shared execution boundary"
+			],
+			"unsuitableExamples": [
+				"guess a cause from the error title alone",
+				"diagnose a bug that needs the reporter's private data"
+			],
+			"guardrails": [
+				"Separate observed evidence from inference in the answer.",
+				"Reproduce or state exactly why reproduction was not possible."
+			],
+			"alternatives": [
+				"Run n8n:reproduce-bug to narrow the boundary mechanically.",
+				"Collect one more piece of evidence and stop rather than guessing."
+			]
+		},
+		"unit-test-authoring": {
+			"label": "Unit and integration tests",
+			"minTier": "balanced",
+			"requires": ["toolUse", "codeExecution"],
+			"suitableExamples": [
+				"add a vitest case for a retry helper",
+				"write a regression test that injects a provider error"
+			],
+			"unsuitableExamples": [
+				"assert on a snapshot nobody reviewed",
+				"add a test that needs real third-party credentials"
+			],
+			"guardrails": [
+				"Tests must fail for the right reason before the fix and pass after it.",
+				"Run the test file, not a broader suite, to keep feedback tight."
+			],
+			"alternatives": [
+				"Write the test skeleton and mark the assertion as a TODO for review."
+			]
+		},
+		"node-integration": {
+			"label": "New integration node",
+			"minTier": "balanced",
+			"requires": ["multiFileEdit", "toolUse"],
+			"suitableExamples": [
+				"scaffold a node with credentials, an operation and an icon",
+				"add an operation to an existing node"
+			],
+			"unsuitableExamples": [
+				"invent API endpoints that are not documented",
+				"hardcode a token into credentials defaults"
+			],
+			"guardrails": [
+				"Follow n8n:node-add-oauth for auth and the community-node lint rules.",
+				"Never invent endpoint shapes; cite the provider documentation."
+			],
+			"alternatives": [
+				"Scaffold from an existing similar node and leave API calls unimplemented."
+			]
+		},
+		"db-migration": {
+			"label": "Database migration",
+			"minTier": "balanced",
+			"requires": ["multiFileEdit", "codeExecution"],
+			"suitableExamples": [
+				"add a nullable column with a backfill",
+				"add an index for a slow query"
+			],
+			"unsuitableExamples": [
+				"drop a column that still has readers",
+				"rewrite migration history"
+			],
+			"guardrails": [
+				"Use n8n:db-migrations; keep sqlite and postgres paths in sync.",
+				"Run pnpm db:schema:check:sqlite.",
+				"Never make a destructive change without an explicit instruction."
+			],
+			"alternatives": [
+				"Propose the migration in a doc and let a human apply it."
+			]
+		},
+		"security-review": {
+			"label": "Security review",
+			"minTier": "frontier",
+			"requires": ["deepReasoning", "longHorizonPlanning"],
+			"suitableExamples": [
+				"review a diff for authz gaps before it merges",
+				"check that a new endpoint is protected (n8n:protect-endpoints)"
+			],
+			"unsuitableExamples": [
+				"publish a write-up of an unpatched vulnerability",
+				"promise that code is secure"
+			],
+			"guardrails": [
+				"This repo is public: keep the vector out of branch names, PR titles, tests and comments.",
+				"Report findings privately per SECURITY.md; never open a public issue for a live vulnerability."
+			],
+			"alternatives": [
+				"Summarize risk areas for a human security reviewer without exploit detail."
+			]
+		},
+		"large-context-triage": {
+			"label": "Large log or diff triage",
+			"minTier": "balanced",
+			"requires": ["longContext", "deepReasoning"],
+			"suitableExamples": [
+				"cluster 2000 failing test cases into causes",
+				"read a 4000-line diff and list only behaviour changes"
+			],
+			"unsuitableExamples": [
+				"paste the whole repository into one prompt",
+				"summarize a log you have not actually loaded"
+			],
+			"guardrails": [
+				"Read files in targeted ranges; quote line numbers.",
+				"Stop and ask for the missing artifact instead of inventing its contents."
+			],
+			"alternatives": [
+				"Filter with grep/rg first and triage a smaller slice."
+			]
+		},
+		"visual-ui-review": {
+			"label": "Screenshot and UI review",
+			"minTier": "balanced",
+			"requires": ["vision"],
+			"suitableExamples": [
+				"compare a component against the design-system rules",
+				"read an error screenshot and locate the failing widget"
+			],
+			"unsuitableExamples": [
+				"judge spacing from a description without the image",
+				"claim pixel accuracy you cannot measure"
+			],
+			"guardrails": [
+				"Ask for the screenshot or render it yourself; describe what is visible, not what is likely.",
+				"Check n8n:design-system rules before proposing visual changes."
+			],
+			"alternatives": [
+				"Review the DOM and CSS instead of the pixels."
+			]
+		},
+		"web-research": {
+			"label": "Current web research",
+			"requiresHarness": ["webSearch"],
+			"suitableExamples": [
+				"check the current provider API for a rate-limit header",
+				"confirm whether a CVE affects a dependency"
+			],
+			"unsuitableExamples": [
+				"recall a 2024 API shape from memory and present it as current",
+				"fetch an internal dashboard without credentials"
+			],
+			"guardrails": [
+				"Cite the source, and say when the only sources are the model's training data.",
+				"Prefer official docs over blog posts."
+			],
+			"alternatives": [
+				"Ask the user to paste the page or the relevant snippet."
+			]
+		},
+		"image-generation": {
+			"label": "Image generation or editing",
+			"requiresHarness": ["imageGeneration"],
+			"suitableExamples": [
+				"make a placeholder hero image for docs",
+				"clean up a screenshot for a PR description"
+			],
+			"unsuitableExamples": [
+				"generate a company logo and call it final",
+				"recreate a proprietary asset"
+			],
+			"guardrails": [
+				"Treat generated assets as drafts; never overwrite a tracked brand asset.",
+				"Keep generated binaries out of Git unless the task requires them."
+			],
+			"alternatives": [
+				"Hand off to an image-capable tool or ask the user for the asset."
+			]
+		},
+		"audio-transcription": {
+			"label": "Audio transcription",
+			"requiresHarness": ["audioInput"],
+			"suitableExamples": ["summarize a recorded bug walkthrough"],
+			"unsuitableExamples": ["transcribe a file you cannot open"],
+			"guardrails": ["Quote timestamps; do not paraphrase decisions as verbatim text."],
+			"alternatives": ["Ask for a transcript or a loom link (n8n:loom-transcript)."]
+		},
+		"mechanical-bulk-edit": {
+			"label": "Mechanical bulk edit / codemod",
+			"requires": ["codeExecution"],
+			"suitableExamples": [
+				"rename a test helper everywhere",
+				"apply one lint autofix across a package"
+			],
+			"unsuitableExamples": [
+				"change behaviour while claiming it is mechanical"
+			],
+			"guardrails": [
+				"Drive it with a script or a codemod, not hand edits.",
+				"Show the diff stat and run the affected tests."
+			],
+			"alternatives": ["Do ten files by hand and confirm the pattern before scaling."]
+		},
+		"commit-and-pr-text": {
+			"label": "Commit messages, PR bodies, release notes",
+			"suitableExamples": [
+				"write a PR body from the diff (n8n:create-pr)",
+				"turn merged PRs into release notes"
+			],
+			"unsuitableExamples": [
+				"describe a fix you did not verify",
+				"mention a customer name in a public artifact"
+			],
+			"guardrails": [
+				"Describe what the code now does; follow .github/pull_request_title_conventions.md.",
+				"Keep security vectors and customer names out — this repo is public."
+			],
+			"alternatives": ["Draft the skeleton and let the author fill in the unknowns."]
+		},
+		"translation-and-copy": {
+			"label": "i18n strings and UI copy",
+			"suitableExamples": ["add a new UI string across locales", "tighten a tooltip"],
+			"unsuitableExamples": ["invent a locale key format", "edit generated i18n files by hand"],
+			"guardrails": [
+				"All UI text goes through i18n ($t('key')); never hardcode English in components.",
+				"Match the tone rules in n8n:content-design."
+			],
+			"alternatives": ["Propose the English string and let a translator review the rest."]
+		},
+		"dependency-upgrade": {
+			"label": "Dependency upgrade",
+			"minTier": "frontier",
+			"requires": ["multiFileEdit", "longHorizonPlanning", "codeExecution"],
+			"suitableExamples": ["bump a major version and fix the breakage"],
+			"unsuitableExamples": ["upgrade five majors at once", "edit the lockfile by hand"],
+			"guardrails": [
+				"One dependency per change; read the changelog before editing.",
+				"Run build, typecheck and tests; do not hand-edit pnpm-lock.yaml."
+			],
+			"alternatives": ["Open an issue with the upgrade plan and a reproduction of the breakage."]
+		},
+		"flaky-test-investigation": {
+			"label": "Flaky test investigation",
+			"minTier": "frontier",
+			"requires": ["deepReasoning", "codeExecution", "longHorizonPlanning"],
+			"suitableExamples": ["find the race in an e2e that fails 1 in 20 runs"],
+			"unsuitableExamples": ["add a retry and call it fixed"],
+			"guardrails": [
+				"Prove the flake with repeated runs before changing the test.",
+				"Report the observed failure rate, not an impression."
+			],
+			"alternatives": ["Quarantine the test with a tracking issue instead of guessing."]
+		},
+		"pr-merge": {
+			"label": "Merging or closing a pull request",
+			"requiresHarness": ["githubWrite"],
+			"suitableExamples": ["merge #1234 with --squash after checks pass"],
+			"unsuitableExamples": ["merge a PR to unblock yourself", "use --auto to merge later"],
+			"guardrails": [
+				"Merge only on an explicit instruction, with the PR number, and never --auto.",
+				"The merge/close command must be the last command in the chain so its exit code is real."
+			],
+			"alternatives": ["Leave the PR ready and report its status for a human to merge."]
+		},
+		"git-push": {
+			"label": "Pushing branches and opening PRs",
+			"requiresHarness": ["gitPush"],
+			"suitableExamples": ["push the session branch and open a draft PR"],
+			"unsuitableExamples": [
+				"force-push master",
+				"push to another agent's branch",
+				"rewrite shared history"
+			],
+			"guardrails": [
+				"Push only the session branch; never create or switch branches in an agent session.",
+				"Use gh pr create --draft unless told otherwise."
+			],
+			"alternatives": ["Leave the commits local and hand the branch name to the user."]
+		},
+		"deterministic-computation": {
+			"label": "Arithmetic, dates, parsing, hashing",
+			"suitableExamples": [
+				"convert a timestamp and a timezone",
+				"count lines in a CSV and sum a column"
+			],
+			"unsuitableExamples": ["estimate a checksum from memory"],
+			"guardrails": [
+				"Use a script or shell command for the answer; do not do it mentally.",
+				"Show the command and its output."
+			],
+			"alternatives": ["Give the command for the user to run."]
+		},
+		"secret-handling": {
+			"label": "Handling credentials or secrets",
+			"hardRefuse": true,
+			"suitableExamples": ["explain how to set an env var without printing it"],
+			"unsuitableExamples": [
+				"paste an API key into chat",
+				"commit a .env with a token",
+				"print a secret to debug a request"
+			],
+			"guardrails": [
+				"Never request, echo, store or commit credentials; pass values via environment variables.",
+				"Never ask the user for a password, token or 2FA code."
+			],
+			"alternatives": [
+				"Tell the user where to set the variable and how to verify it is present without printing it.",
+				"Move the missing value into the harness's secret store."
+			]
+		},
+		"legal-and-licensing": {
+			"label": "Legal or licence interpretation",
+			"hardRefuse": true,
+			"suitableExamples": ["point to LICENSE.md and docs.n8n.io for the Sustainable Use License"],
+			"unsuitableExamples": [
+				"decide whether a use case is permitted by the licence",
+				"advise on a customer contract"
+			],
+			"guardrails": ["Summarize what the file says and route the decision to a human."],
+			"alternatives": ["Quote the licence section and ask legal@n8n.io."]
+		},
+		"unauthorized-mutation": {
+			"label": "Mutating external systems without authorization",
+			"hardRefuse": true,
+			"suitableExamples": ["draft the change and show the diff"],
+			"unsuitableExamples": [
+				"apply a production migration",
+				"post to Linear or close issues because the session started",
+				"delete a customer's workflow"
+			],
+			"guardrails": [
+				"Default to read-only; mutations need an explicit, specific instruction.",
+				"Draft comments and state changes until the user authorizes posting."
+			],
+			"alternatives": ["Produce the exact command or payload for the user to run."]
+		},
+		"fabricated-evidence": {
+			"label": "Reporting results that were not observed",
+			"hardRefuse": true,
+			"suitableExamples": ["say the test suite was not run and why"],
+			"unsuitableExamples": [
+				"claim a test passed without running it",
+				"invent a stack trace or a file that does not exist",
+				"summarize a document you never opened"
+			],
+			"guardrails": [
+				"Distinguish observed from inferred in every report.",
+				"If a command could not run, say so and show the error."
+			],
+			"alternatives": ["Run the check now, or hand back an explicit list of what remains unverified."]
+		}
+	}
+}
