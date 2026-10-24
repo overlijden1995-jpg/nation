@@ -49,6 +49,28 @@ are namespaced under `n8n:`. Use `n8n:` prefix when invoking them (e.g.
 `/n8n:create-pr`, `/n8n:plan`, `n8n:developer` agent). See
 [plugin README](.claude/plugins/n8n/README.md) for structure and details.
 
+### Know which model you are, and route accordingly
+
+Agents run on different models and harnesses. Before committing to a
+non-trivial task, identify the running model and check that it can finish the
+task unattended:
+
+```bash
+node scripts/model-routing/router.mjs detect   # model, tier, harness, capabilities
+node scripts/model-routing/router.mjs tasks    # allow / guardrails / refuse per task class
+node scripts/model-routing/router.mjs route --task <id>
+```
+
+`route` exits `3` when the task is outside what this model and harness can
+deliver, with the named missing requirement and a concrete alternative. Refuse
+those tasks out loud instead of attempting a degraded version, and never let a
+stronger model route around the four hard refusals (secrets, unauthorized
+mutations, fabricated evidence, legal advice). The task taxonomy lives in
+`scripts/model-routing/registry.json`; extend it when a new model family
+appears. See `n8n:model-capability-routing` for the workflow and
+`n8n:arena-agent-mode` for sandbox, network, preview and branch rules when
+running inside an Arena session.
+
 ## Essential Commands
 
 ### Fresh checkout / agent setup

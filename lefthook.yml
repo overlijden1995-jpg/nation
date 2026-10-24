@@ -44,6 +44,12 @@ pre-commit:
       skip:
         - merge
         - rebase
+    model_routing_check:
+      glob: 'scripts/model-routing/**'
+      run: node scripts/model-routing/router.mjs check
+      skip:
+        - merge
+        - rebase
     skill_links_check:
       glob: '.agents/skills/**'
       run: node scripts/sync-agent-skill-links.mjs --check
