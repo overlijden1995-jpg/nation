@@ -46,6 +46,8 @@
     "boundaries": "turbo boundaries",
     "boundaries:check": "node scripts/check-boundaries.mjs",
     "boundaries:baseline": "node scripts/check-boundaries.mjs --write",
+    "selfhost": "bash scripts/self-host/setup-n8n.sh",
+    "test:selfhost": "bash scripts/self-host/test/run-tests.sh",
     "models:detect": "node scripts/model-routing/router.mjs detect",
     "models:tasks": "node scripts/model-routing/router.mjs tasks",
     "models:route": "node scripts/model-routing/router.mjs route",
